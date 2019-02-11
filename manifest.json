@@ -1,0 +1,16 @@
+{
+	"version": "1.0",
+	"short_name":"Invader",
+	"name":"Invader",
+	"display":"standalone",
+	"start_url":"index.html",
+	"theme_color":"#09D",
+	"background_color": "#333",
+	"icons":[
+		{
+			"src": "images/app.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		}
+	]
+}
