@@ -116,7 +116,7 @@
             gameover = false;
             level = 1;
             Score = 0;
-            p = { x: 10, y: 10, name: "A", status: 0, count: 0 };
+            p = { x: 10, y: 19, name: "A", status: 0, count: 0 };
             b = { x: 21, y: 21, status: 0, name: "||" };
             invader.length = 0;
             interval = 0;
@@ -125,31 +125,20 @@
             document.getElementById("Gable").innerHTML = "";
             load();
         },
-            move = function (x, y, keycode) {
-                if (keycode == -1) {
-                    for (var i = 0; i < invader.length; i++) {
-                        if (invader[i].x == x && invader.y == y) {
-                            gameover = true;
-                            break;
-                        }
-                    }
-                    p.x = x;
-                    p.y = y;
-                } else {
-                    switch (keycode) {
-                        case 37://left
-                            if (p.x - 1 >= 0) p.x--;
-                            break;
-                        case 39://right
-                            if (p.x + 1 < 20) p.x++;
-                            break;
-                        case 38://up
-                            if (p.y - 1 >= 0) p.y--;
-                            break;
-                        case 40://down
-                            if (p.y + 1 < 20) p.y++;
-                            break;
-                    }
+            move = function (keycode) {
+                switch (keycode) {
+                    case 37://left
+                        if (p.x - 1 >= 0) p.x--;
+                        break;
+                    case 39://right
+                        if (p.x + 1 < 20) p.x++;
+                        break;
+                    case 38://up
+                        if (p.y - 1 >= 0) p.y--;
+                        break;
+                    case 40://down
+                        if (p.y + 1 < 20) p.y++;
+                        break;
                 }
                 for (var i = 0; i < invader.length; i++) {
                     if (invader[i].x == p.x && invader[i].y == p.y) {
@@ -162,15 +151,25 @@
 
                 draw();
             },
-            shot = function () {
-                if (b.status != 1) {
-                    b.status = 1;
-                    b.y = p.y - 1;
-                    b.x = p.x;
+            movePos = function (x, y) {
+                for (var i = 0; i < invader.length; i++) {
+                    if (invader[i].x == x && invader.y == y) {
+                        gameover = true;
+                        break;
+                    }
                 }
-                check();
-                draw();
-            },
+                p.x = x;
+                p.y = y;
+            }
+        shot = function () {
+            if (b.status != 1) {
+                b.status = 1;
+                b.y = p.y - 1;
+                b.x = p.x;
+            }
+            check();
+            draw();
+        },
             load = function () {
                 if (readData < data().length) {
                     tmp = [];
@@ -208,7 +207,7 @@
                     }
                     if (p.status == 0)
                         table[p.y][p.x] = p.name;
-                    if (b.status == 1)
+                    if (b.status == 1 && b.x >= 0 && b.y >= 0 && b.x < 20 && b.y < 20)
                         table[b.y][b.x] = b.name;
                     if (invader.length > 0) {
                         for (var i = 0; i < invader.length; i++) {
@@ -216,12 +215,13 @@
                         }
                     }
                     ctx.fillStyle = "#000";
-                    ctx.clearRect(0, 0, canvas.width, canvas.width);
-                    ctx.rect(0, 0, TILE_W * 20, TILE_H * 20 + offset_y);
+                    ctx.rect(0, 0, TILE_W * 20 + 20, TILE_H * 20 + 20 + offset_y);
                     ctx.fill();
                     ctx.fillStyle = "#FFF";
                     for (var i = 0; i < 20; i++)
                         for (var j = 0; j < 20; j++) {
+                            if (table[i][j] == "L")
+                                break;
                             if (table[i][j] == "&")
                                 ctx.fillStyle = color;
                             ctx.fillText(table[i][j], TILE_W * j, TILE_H * i + offset_y);
@@ -380,7 +380,7 @@
                         gameover = true;
                         level = 1;
                         document.getElementById("power-gage").innerHTML = "";
-                        document.getElementById("Gable").innerHTML = "<h1 style='color:red;font-size:30px;right:50%;bottom:50%;position:absolute'>GAME OVER</h1>";
+                        document.getElementById("Gable").innerHTML = "<h1 style='color:red;left:40%;top:40%;position:absolute'>GAME&nbsp;OVER</h1>";
                         return;
                     }
                 }
@@ -416,7 +416,7 @@
                 invader = tmp;
                 if (invader.length == 0 && readData == data().length) {
                     document.getElementById("power-gage").innerHTML = "";
-                    document.getElementById("Gable").innerHTML = "<h1 style='color:#0f0;font-size:30px;right:50%;bottom:50%;position:absolute'>CLEAR</h1>";
+                    document.getElementById("Gable").innerHTML = "<h1 style='color:#0f0;right:50%;bottom:50%;position:absolute'>CLEAR</h1>";
                     clear = true;
                 }
             }
@@ -427,10 +427,14 @@
                 if (interval >= nextTime)
                     load();
                 //bomb motion
-                b.y--;
-                if (b.y < 0) {
-                    b.status = 0;
-                    b.y = 100;
+                if (b.status != 1 && touch)
+                    shot();
+                if (b.status == 1) {
+                    b.y--;
+                    if (b.y < 0) {
+                        b.status = 0;
+                        b.y = 100;
+                    }
                 }
                 for (var i = 0; i < invader.length; i++) {
                     moveInvader(i);
@@ -449,7 +453,7 @@
         else
             TILE_W = TILE_H;
         ctx.font = TILE_H + "px Arial";
-        var offset_y = TILE_H;
+        var offset_y = TILE_H, c_top = canvas.getBoundingClientRect().top, c_left = canvas.getBoundingClientRect().left, touch = false;
         setInterval(update, 100);
         document.addEventListener("keydown", function (e) {
             if (gameover && clear)
@@ -457,12 +461,18 @@
             else if ((gameover & !clear) | (!gameover & clear)) {
                 gameover = true;
                 clear = true;
-                document.getElementById("Gable").innerHTML = "<h1 style='font-size:30px;color:#0ff;right:50%;bottom:50%;position:absolute'>START</h1>"
+                document.getElementById("Gable").innerHTML = "<h1 style='color:#0ff;right:50%;bottom:50%;position:absolute'>START</h1>"
             } else if (e.keyCode == 32)
                 shot();
             else if (e.keyCode >= 37 && e.keyCode <= 40)
-                move(0, 0, e.keyCode);
+                move(e.keyCode);
             else if (e.keyCode == 65) { invader = []; interval = nextTime; load(); }
+        })
+        canvas.addEventListener("touchend", function (e) {
+            touch = false;
+        })
+        canvas.addEventListener("mouseup", function (e) {
+            touch = false;
         })
         canvas.addEventListener("mousedown", function (e) {
             if (gameover && clear)
@@ -470,18 +480,44 @@
             else if ((gameover & !clear) | (!gameover & clear)) {
                 gameover = true;
                 clear = true;
-                document.getElementById("Gable").innerHTML = "<h1 style='font-size:30px;color:#0ff;right:50%;bottom:50%;position:absolute'>START</h1>"
+                document.getElementById("Gable").innerHTML = "<h1 style='color:#0ff;right:50%;bottom:50%;position:absolute'>START</h1>"
+            } else {
+                var x = Math.floor((e.clientX - c_left) / TILE_W);
+                var y = Math.floor((e.clientY - c_top - TILE_H * 2.5) / TILE_H);
+                if (y >= 0 && y < 20 && x >= 0 && x < 20)
+                    movePos(x, y);
             }
+            touch = true;
+        })
+        canvas.addEventListener("touchstart", function (e) {
+            if (gameover && clear)
+                init();
+            else if ((gameover & !clear) | (!gameover & clear)) {
+                gameover = true;
+                clear = true;
+                document.getElementById("Gable").innerHTML = "<h1 style='font-size:30px;color:#0ff;right:50%;bottom:50%;position:absolute'>START</h1>"
+            } else {
+                var x = Math.floor((e.touches[0].clientX - c_left) / TILE_W);
+                var y = Math.floor((e.touches[0].clientY - c_top - TILE_H * 2.5) / TILE_H);
+                if (y >= 0 && y < 20 && x >= 0 && x < 20)
+                    movePos(x, y);
+            }
+            touch = true;
         })
         canvas.addEventListener("touchmove", function (e) {
             if (!(gameover | clear)) {
-                var mx = e.touches[0].clientX - e.target.getBoundingClientRect().left - TILE_W / 2;
-                var my = e.touches[0].clientY - e.target.getBoundingClientRect().top - TILE_H / 2;
-                var x = Math.floor(mx / TILE_W);
-                var y = Math.floor(my / TILE_H);
+                var x = Math.floor((e.touches[0].clientX - c_left) / TILE_W);
+                var y = Math.floor((e.touches[0].clientY - c_top - TILE_H * 2.5) / TILE_H);
                 if (y >= 0 && y < 20 && x >= 0 && x < 20)
-                    move(x, y, -1);
-                shot();
+                    movePos(x, y);
+            }
+        })
+        canvas.addEventListener("mousemove", function (e) {
+            if (!(gameover | clear)) {
+                var x = Math.floor((e.clientX - c_left) / TILE_W);
+                var y = Math.floor((e.clientY - c_top - TILE_H * 2.5) / TILE_H);
+                if (y >= 0 && y < 20 && x >= 0 && x < 20)
+                    movePos(x, y);
             }
         })
     </script>
