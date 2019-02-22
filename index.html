@@ -10,11 +10,8 @@
 </head>
 
 <body style="overflow:hidden;background-color: black">
-    Score:
-    <div id="score" style="color:#333"></div>
-    <div id="power-gage" style="color:#f00"></div>
     <canvas id="Ganvas"></canvas>
-    <div id="Gable"></div>
+    <div id="Gable" style="user-select: none"></div>
     <script>
         //service worker
         if ('serviceWorker' in navigator) {
@@ -27,33 +24,29 @@
 
         function data() {
             var data = [[
-                { name: "V", x: 50, y: 0, wait: 30 }
+                { name:"L",x:10,y:10,wait:10}
             ], [
-                { name: "V", x: 50, y: 0, wait: 30 }
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "V", x: 50, y: 0, wait: 30 }
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "V", x: 50, y: 0, wait: 30 }
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "V", x: 50, y: 0, wait: 30 }
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "V", x: 50, y: 0, wait: 30 }
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "V", x: 50, y: 0, wait: 30 }
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "Y", x: 50, y: 0, wait: 30 }
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "Y", x: 50, y: 0, wait: 30 }
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "Y", x: 50, y: 0, wait: 30 }
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
             ], [
-                { name: "Y", x: 50, y: 0, wait: 30 }
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
             ], [
-                { name: ">", x: 50, y: 0, wait: 30 }
-            ], [
-                { name: "Y", x: 50, y: 0, wait: 30 }
-            ], [
-                { name: "Y", x: 50, y: 0, wait: 30 }
+                { name: ">", x: 10, y: 0, wait: 30 }, { name: "<", x: 90, y: 0, wait: 30 }
             ], [
                 { name: "$", x: 50, y: 0, wait: 30 }
             ], [
@@ -69,6 +62,43 @@
             }
             return data;
         }
+            var Data = [[
+                { name:"L",x:10,y:10,wait:10}
+            ], [
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "V", x: 10, y: 0, wait: 30 }, { name: "V", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "Y", x: 10, y: 0, wait: 30 }, { name: "Y", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: ">", x: 10, y: 0, wait: 30 }, { name: "<", x: 90, y: 0, wait: 30 }
+            ], [
+                { name: "$", x: 50, y: 0, wait: 30 }
+            ], [
+                { name: "&", x: 50, y: 0, wait: 30 }
+            ]];
+            var tmp_c = 0;
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < data[i].length; j++) {
+                    data[i][j].count = tmp_c;
+                    data[i][j].status = 0;
+                }
+                tmp_c++;
+            }
         var clear = true,
             gameover = true,
             p = {},
@@ -79,8 +109,9 @@
             nextTime = 0,
             level = 1,
             Score = 0,
+            length=Data.length,
             canvas = document.getElementById("Ganvas"),
-            ctx = canvas.getContext("2d");
+            ctx = canvas.getContext("2d"),
         init = function () {
             touch = false;
             clear = false;
@@ -130,19 +161,23 @@
                 if (b.length == 0) {
                     b[0] = { x: p.x, y: p.y, status: 1, interval: interval };
                 }
-                else if (b[b.length - 1].interval - interval > 25) {
-                    b[b.length] = { x: p.x, y: p.y, status: 1, interval: interval };
+                else if (b[b.length - 1].interval > 25) {
+                    b[b.length] = { x: p.x, y: p.y, status: 1, interval: 0 };
                 }
                 check();
                 draw();
             },
             load = function () {
-                if (readData < data().length) {
+                if (readData < length) {
                     tmp = [];
                     for (var i = 0; i < invader.length; i++) {
                         if (invader[i].status != 1) {
                             tmp[tmp.length] = invader[i];
                         }
+                    }
+                    for(var i=0;i<Data[readData].length;i++)
+                    {
+                        
                     }
                     invader = data()[readData].slice(0, data()[readData].length);
                     for (var i = 0; i < tmp.length; i++) {
@@ -198,7 +233,7 @@
                             ctx.arc((element.x + 5) * zoom, (element.y + 5) * zoom, 5 * zoom, 0, 7);
                             ctx.stroke();
                             ctx.beginPath();
-                            ctx.rect(0, 0, element.life * 5 * zoom, 2 * zoom);
+                            ctx.rect(0, 0, element.life  * zoom, 2 * zoom);
                             ctx.fill();
                             element.color = "#00F";
                         } else {
@@ -304,7 +339,8 @@
                             if (invader[i].score == undefined)
                                 invader[i].score = 20;
                         invader[i].x--;
-                        invader[invader.length] = { x: invader[i].x, y: invader[i].y + 1, status: 0, name: "|" };
+                        if (invader[i].x % 15 == 0)
+                            invader[invader.length] = { x: invader[i].x, y: invader[i].y + 1, status: 0, name: "|" };
                         break;
                     case "L":
                         if (invader[i].score == undefined)
@@ -371,17 +407,34 @@
                         if (invader[i].interval == undefined)
                             invader[i].interval = 0;
                         if (invader[i].life == undefined)
-                            invader[i].life = 8;
+                            invader[i].life = 16;
                         if (invader[i].x > p.x)
                             invader[i].x--;
                         else if (invader[i].x < p.x)
                             invader[i].x++;
                         if (invader[i].interval % 100 > 20 && invader[i].interval % 10 == 0) {
-                            invader[invader.length] = { x: invader[i].x - 10, y: invader[i].y + 1, status: 0, name: "|" };
-                            invader[invader.length] = { x: invader[i].x, y: invader[i].y + 1, status: 0, name: "|" };
-                            invader[invader.length] = { x: invader[i].x + 10, y: invader[i].y + 1, status: 0, name: "|" };
+                            invader[invader.length] = { x: invader[i].x - 5, y: invader[i].y + 1, status: 0, name: "|" };
+                            invader[invader.length] = { x: invader[i].x + 5, y: invader[i].y + 1, status: 0, name: "|" };
+                        } else if (invader[i].interval % 50 == 1) {
+                            invader[invader.length] = { x: invader[i].x + 1, y: invader[i].y + 1, d: 2, status: 0, name: "()" };
+                            invader[invader.length] = { x: invader[i].x - 1, y: invader[i].y + 1, d: -2, status: 0, name: "()" };
                         }
                         invader[i].interval++;
+                        break;
+                    case "P":
+                        if (invader[i].score == undefined)
+                            invader[i].score = 20;
+                        if (invader[i].interval == undefined)
+                            invader[i].invader = 0;
+                        invader[i].interval++;
+                        if (invader[i].x > p.x)
+                            invader[i].x--;
+                        else if (invader[i].x < p.x)
+                            invader[i].x++;
+                        if (invader[i].y > p.y)
+                            invader[i].y--;
+                        else if (invader[i].y < p.y)
+                            invader[i].y++;
                         break;
                 }
             },
@@ -442,7 +495,7 @@
                 if (touch)
                     if (b.length == 0)
                         shot();
-                    else if (touch && b[b.length - 1].interval - interval > 25)
+                    else if (b[b.length - 1].interval > 25)
                         shot();
                 if (b.length != 0) {
                     for (var i = 0; i < b.length; i++) {
@@ -512,7 +565,7 @@
                 } else
                 touch = true;
         });
-        document.addEventListener("mouseup", function (e) {touch = false;});
+        document.addEventListener("mouseup", function (e) { touch = false; });
         //touch
         document.addEventListener("touchmove", function (e) {
             x = Math.floor((e.touches[0].clientX - canvas.offsetLeft) / (zoom));
@@ -523,8 +576,9 @@
             }
         })
         var touch = false;
-        document.addEventListener("touchstart", function (e) {touch = true;})
-        document.addEventListener("touchend", function (e) {touch = false;})
+        document.addEventListener("touchstart", function (e) { touch = true; })
+        document.addEventListener("touchend", function (e) { touch = false; })
+	init();
     </script>
 </body>
 
